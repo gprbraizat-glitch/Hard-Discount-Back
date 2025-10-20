@@ -13,7 +13,6 @@ const dbSettings = {
     trustServerCertificate: true,
   },
 };
-
 export async function getConnection() {
   try {
     const pool = await sql.connect(dbSettings);
@@ -22,5 +21,4 @@ export async function getConnection() {
     console.error("❌ Error de conexión:", error);
   }
 }
-
 export { sql };

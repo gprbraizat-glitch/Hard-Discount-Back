@@ -55,29 +55,23 @@ export const crearPedido = async (req, res) => {
     res.status(500).json({ msg: "Error al crear pedido", error: error.message });
   }
 };
-
 // Listar pedidos (filtra según el rol del usuario)
 export const listarPedidos = async (req, res) => {
   try {
     const pool = await getConnection();
-
     // Usuario autenticado y su rol
     const usuarioId = req.user?.id;
     const rol = req.user?.rol; // Asegúrate de incluir 'rol' en el token JWT
-
     let query = `
       SELECT p.id, u.nombre AS usuario, p.estado, p.fechaPedido
       FROM Pedidos p
       INNER JOIN Usuarios u ON p.usuarioId = u.id
     `;
-
     // Si es cliente, solo ve sus pedidos
     if (rol === "cliente") {
       query += ` WHERE p.usuarioId = ${usuarioId}`;
     }
-
     query += ` ORDER BY p.fechaPedido DESC`;
-
     const result = await pool.request().query(query);
     res.json(result.recordset);
   } catch (error) {
@@ -85,27 +79,21 @@ export const listarPedidos = async (req, res) => {
     res.status(500).json({ msg: "Error al listar pedidos", error: error.message });
   }
 };
-
 // Actualizar pedido (y ajustar stock si se marca como entregado)
 export const actualizarPedido = async (req, res) => {
   const { id } = req.params;
   const { usuarioId, estado } = req.body;
-
   try {
     const pool = await getConnection();
-
     // Obtener el estado actual del pedido
     const pedidoActual = await pool
       .request()
       .input("id", sql.Int, id)
       .query(`SELECT estado FROM Pedidos WHERE id = @id`);
-
     if (pedidoActual.recordset.length === 0) {
       return res.status(404).json({ msg: "Pedido no encontrado" });
     }
-
     const estadoAnterior = pedidoActual.recordset[0].estado;
-
     // Actualizar los campos (usuarioId y/o estado)
     const result = await pool
       .request()
@@ -118,15 +106,12 @@ export const actualizarPedido = async (req, res) => {
             estado = ISNULL(@estado, estado)
         WHERE id = @id
       `);
-
     if (result.rowsAffected[0] === 0) {
       return res.status(404).json({ msg: "Pedido no encontrado" });
     }
-
     // Si cambia a "Entregado" y antes no lo era, actualizar el stock
     if (estado === "Entregado" && estadoAnterior !== "Entregado") {
       console.log("📦 Pedido entregado — actualizando stock...");
-
       const detalles = await pool
         .request()
         .input("id", sql.Int, id)
@@ -135,7 +120,6 @@ export const actualizarPedido = async (req, res) => {
           FROM PedidoItems 
           WHERE pedidoId = @id
         `);
-
       for (const item of detalles.recordset) {
         console.log(`🧾 Restando ${item.cantidad} del producto ${item.productoId}`);
         await pool
@@ -148,17 +132,14 @@ export const actualizarPedido = async (req, res) => {
             WHERE id = @productoId
           `);
       }
-
       console.log("✅ Stock actualizado correctamente.");
     }
-
     res.json({ msg: "Pedido actualizado correctamente ✅" });
   } catch (error) {
     console.error("Error al actualizar pedido:", error);
     res.status(500).json({ msg: "Error al actualizar pedido", error: error.message });
   }
 };
-
 // Eliminar pedido
 export const eliminarPedido = async (req, res) => {
   const { id } = req.params;
@@ -173,7 +154,6 @@ export const eliminarPedido = async (req, res) => {
     res.status(500).json({ msg: "Error al eliminar pedido", error: error.message });
   }
 };
-
 // Listar items por pedido
 export const listarItemsPorPedido = async (req, res) => {
   const { id } = req.params;

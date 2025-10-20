@@ -6,7 +6,6 @@ import {
 } from "../controllers/entregas.controller.js";
 import { verificarToken } from "../middlewares/auth.middleware.js"; 
 const router = Router();
-
 // Registrar nueva entrega (protegido)
 router.post("/", verificarToken, registrarEntrega);
 // Listar entregas (protegido)
