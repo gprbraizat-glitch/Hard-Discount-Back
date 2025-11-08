@@ -111,7 +111,7 @@ export const actualizarPedido = async (req, res) => {
     }
     // Si cambia a "Entregado" y antes no lo era, actualizar el stock
     if (estado === "Entregado" && estadoAnterior !== "Entregado") {
-      console.log("📦 Pedido entregado — actualizando stock...");
+      console.log("Pedido entregado — actualizando stock...");
       const detalles = await pool
         .request()
         .input("id", sql.Int, id)
@@ -121,7 +121,7 @@ export const actualizarPedido = async (req, res) => {
           WHERE pedidoId = @id
         `);
       for (const item of detalles.recordset) {
-        console.log(`🧾 Restando ${item.cantidad} del producto ${item.productoId}`);
+        console.log(`Restando ${item.cantidad} del producto ${item.productoId}`);
         await pool
           .request()
           .input("productoId", sql.Int, item.productoId)
