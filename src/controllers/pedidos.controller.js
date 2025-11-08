@@ -6,7 +6,7 @@ export const crearPedido = async (req, res) => {
     console.log("Crear pedido — Body recibido:", req.body);
     console.log(" Usuario desde token:", req.user);
 
-    const usuarioId = req.user?.id; // <- viene del token JWT
+    const usuarioId = req.user?.id; //viene del token JWT
     const { productos } = req.body;
 
     if (!usuarioId) {
